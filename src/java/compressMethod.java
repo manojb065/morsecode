@@ -24,8 +24,6 @@ import javax.servlet.http.HttpServletResponse;
  * @author manoj
  */
 
-@MultipartConfig(location="C:/Users/manoj/Desktop/fsproject11/files", fileSizeThreshold=1024*1024,
-    maxFileSize=1024*1024*5, maxRequestSize=1024*1024*5*5)
 public class compressMethod extends HttpServlet {
    private final static char[] letter = { 'a', 'b', 'c', 'd', 'e', 'f',
 						'g', 'h', 'i', 'j', 'k', 'l',

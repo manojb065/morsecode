@@ -1,11 +1,13 @@
 
 
-import java.io.File;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -28,29 +30,19 @@ public class del extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-          String id=request.getParameter("id");
-          File file = new File("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\data.txt");
-        Scanner s =new Scanner(new File("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\info.txt"));
-        String k[]=s.nextLine().split(",");
-        int tot=Integer.valueOf(k[1])-1;
-       FileWriter fw = new FileWriter(new File("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\info.txt"));
-            fw.write(k[0]+","+tot);
-            fw.close();
-          Scanner  f = new Scanner(file);
-          ArrayList<String[]> data = new ArrayList<String[]>();
-          while(f.hasNext()){
-              String temp[]=f.nextLine().split(",");
-              if(!temp[0].equalsIgnoreCase(id))
-              data.add(temp);
-          }
-          f.close();
+            throws ServletException, IOException, ClassNotFoundException {
+          int id=Integer.valueOf(request.getParameter("id"));
           
-           fw = new FileWriter(file);
-          for(String[] i:data){
-              fw.write(i[0]+","+i[1]+","+i[2]+","+i[3]+"\n");
-          }
-          fw.close();
+            ObjectInputStream op = new ObjectInputStream(new  FileInputStream("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\data1.txt"));
+            HashMap<Integer,String> map = (HashMap<Integer,String>) op.readObject();
+            op.close();
+            System.out.println(id+" ***********");
+            map.remove(id);
+            System.out.println(map);
+            ObjectOutputStream ow = new ObjectOutputStream(new FileOutputStream("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\data1.txt"));
+             ow.writeObject(map);
+             ow.close();
+            
            RequestDispatcher red = getServletContext()
       .getRequestDispatcher("/filemanage");
               red.forward(request, response);
@@ -69,7 +61,11 @@ public class del extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(del.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -83,7 +79,11 @@ public class del extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(del.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**

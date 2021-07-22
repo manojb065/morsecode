@@ -1,7 +1,11 @@
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.Scanner;
 import javax.servlet.ServletException;
@@ -9,24 +13,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
-/**
- *
- * @author manoj
- */
 public class filemanage extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, ClassNotFoundException {
         Scanner s =new Scanner(new File("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\info.txt"));
         String k[]=s.nextLine().split(",");
         if(request.getAttribute("method")!="post"){
@@ -39,7 +33,16 @@ public class filemanage extends HttpServlet {
 "    <meta charset=\"utf-8\">\n" +
 "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, shrink-to-fit=no\">\n" +
 "    <title>FS Records</title>\n" +
-"    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css\">\n" +
+"    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css\">\n" +"<style>#myInput {\n" +
+"  background-image: <i class=\"fas fa-search\"></i>;\n" +
+"  background-position: 10px 10px;\n" +
+"  background-repeat: no-repeat;\n" +
+"  width: 100%;\n" +
+"  font-size: 16px;\n" +
+"  padding: 12px 20px 12px 40px;\n" +
+"  border: 1px solid #ddd;\n" +
+"  margin-bottom: 12px;\n" +
+"}</style>"+
 "</head>\n" +
 "");
             
@@ -47,7 +50,8 @@ public class filemanage extends HttpServlet {
 "   <center> <h1 \">Records</h1>\n" +
 "    <p \"><strong>Number of Records ="+k[1]+"</strong></p>\n" +
 "    <div class=\"table-responsive\" style=\"padding-left: 100px;padding-right: 100px;padding-top: 39px;\">\n" +
-"        <table class=\"table\">");
+        "<input type=\"text\" id=\"myInput\" onkeyup=\"myFunction()\" placeholder=\"Search for SL.no\" title=\"Type in a Sl.no\">"+
+"        <table class=\"table\" id='myTable'>");
             out.println(" <thead>\n" +
 "                    <td>sl.no</td>\n" +
 "                    <td>date</td>\n" +
@@ -55,24 +59,55 @@ public class filemanage extends HttpServlet {
 "                    <td>code</td>\n" +
 "                    <td>delete</td>\n" +
 "                </thead>");
-            Scanner  f = new Scanner(new File("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\data.txt"));
-            while(f.hasNext()){
-                out.println("<tbody>");
-                String t=f.nextLine();
+            
+            ObjectInputStream op = new ObjectInputStream(new  FileInputStream("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\data1.txt"));
+            HashMap<Integer,String> map = (HashMap<Integer,String>) op.readObject();
+           
+            out.println("<tbody id='data'>");
+            for(HashMap.Entry<Integer,String> m : map.entrySet()){
+                
+                String t=m.getValue().toString();
+                
                  String data[]=t.split("(,)");
-                 for(String i:data){
-                     System.out.println(i);
-                 }
-                    out.print("<tr><td>"+data[0]+"</td>");
+              
+                    out.print("<tr ><td>"+m.getKey()+"</td>");
+                    out.print("<td>"+data[0]+"</td>");
                     out.print("<td>"+data[1]+"</td>");
                     out.print("<td>"+data[2]+"</td>");
-                    out.print("<td>"+data[3]+"</td>");
-                    out.print("<td><a href='del?id="+data[0]+"'>delete</a></td></tr>");
+                    out.print("<td><a href='del?id="+m.getKey()+"'>delete</a></td></tr>");
             }
             out.print("</tbody></table>");
             out.print("<footer></div><a href=\"home.html\" style=\"margin-top:5px;font-size: 24px;\">home</a></footer>");
-            out.println("</center></body>");
+            out.println("</center><script>\n" 
+                    
+                    + "function myFunction() {\n" +
+
+"  var input, filter, table, tr, td, i, txtValue;\n"
+                    + "console.log('pressed');" +
+"  input = document.getElementById(\"myInput\");\n" +
+"  filter = input.value;\n" +
+"  tr = document.getElementById(\"data\").getElementsByTagName('tr');\n" +
+ "console.log(input);" +
+ "console.log(tr);" +
+"  // Loop through all table rows, and hide those who don't match the search query\n" +
+"  for (i = 0; i < tr.length; i++) {\n" +
+"    td = tr[i].getElementsByTagName(\"td\")[0].innerText;\n"
+                    +
+                    
+"    if (td) {\n" +
+"      if (filter==td.substring(0,filter.length)) {\n" +
+"        tr[i].style.display = \"\";\n" +
+"      } else {\n" +
+"        tr[i].style.display = \"none\";\n" +
+"      }\n" +
+"    }\n" +
+"  }\n" +
+"}"+
+
+"</script></body>");
             out.println("</html>");
+            op.close();
+            
         }
         
         
@@ -82,6 +117,19 @@ public class filemanage extends HttpServlet {
             int index=Integer.valueOf(k[0])+1;
             int tot=Integer.valueOf(k[1])+1;
             s.close();
+            ObjectInputStream op = new ObjectInputStream(new  FileInputStream("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\data1.txt"));
+            HashMap<Integer,String> map = (HashMap<Integer,String>) op.readObject();
+
+            StringBuffer sb =new StringBuffer();
+            sb.append(LocalDate.now()+",");
+            sb.append(request.getAttribute("text")+",");
+            sb.append(request.getAttribute("code"));
+            map.put(index, sb.toString());
+            System.out.println(map);
+            op.close();
+            ObjectOutputStream ow = new ObjectOutputStream(new FileOutputStream("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\data1.txt"));
+            ow.writeObject(map);
+            ow.close();
             f.append(index+","+LocalDate.now()+","+request.getAttribute("text")+","+request.getAttribute("code")+"\n");
             f.close(); 
             f = new FileWriter(new File("C:\\Users\\manoj\\Desktop\\fsproject11\\files\\info.txt"));
@@ -108,7 +156,11 @@ public class filemanage extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(filemanage.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -122,7 +174,11 @@ public class filemanage extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(filemanage.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
